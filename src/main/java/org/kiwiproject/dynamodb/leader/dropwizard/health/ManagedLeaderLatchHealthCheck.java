@@ -83,8 +83,13 @@ public class ManagedLeaderLatchHealthCheck extends HealthCheck {
                     .build();
         }
 
-        var isLeader = status.isLeader();
         var leaderInfo = leaderLatch.getLeader();
+
+        // The status is an in-memory check and getLeader() is a DynamoDB read, so leadership can change between them.
+        // Check the status again afterward, and only report a mismatch if this participant was the leader both times.
+        var statusAfterLookup = leaderLatch.checkLeadershipStatus();
+        var isLeader = statusAfterLookup.isLeader();
+        var wasLeaderThroughout = status.isLeader() && isLeader;
 
         if (leaderInfo instanceof LeaderInfo.LookupFailed failed) {
             return newUnhealthyResultBuilder(CRITICAL)
@@ -107,7 +112,7 @@ public class ManagedLeaderLatchHealthCheck extends HealthCheck {
 
         var leaderParticipantId = ((LeaderInfo.Leader) leaderInfo).participantId();
 
-        if (isLeader && !leaderParticipantId.equals(thisParticipantId)) {
+        if (wasLeaderThroughout && !leaderParticipantId.equals(thisParticipantId)) {
             return newUnhealthyResultBuilder(CRITICAL)
                     .withMessage("This participant (%s) believes it is the leader for key %s, but DynamoDB records %s as the leader",
                             thisParticipantId, leadershipKey, leaderParticipantId)

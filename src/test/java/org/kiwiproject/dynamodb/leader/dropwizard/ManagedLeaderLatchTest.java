@@ -89,6 +89,34 @@ class ManagedLeaderLatchTest {
         }
 
         @Test
+        void shouldRejectInvalidServiceDescriptors() {
+            var dynamoDbClient = mock(DynamoDbClient.class);
+            var configuration = LeaderLatchConfiguration.forTable("service-leader-locks");
+            var valid = ServiceDescriptor.builder().name("svc").version("1.0").hostname("host").port(8080).build();
+
+            assertAll(
+                    () -> assertThatIllegalArgumentException()
+                            .isThrownBy(() -> new ManagedLeaderLatch(dynamoDbClient, configuration,
+                                    ServiceDescriptor.builder().version("1.0").hostname("host").port(8080).build()))
+                            .withMessage("serviceDescriptor name must not be blank"),
+                    () -> assertThatIllegalArgumentException()
+                            .isThrownBy(() -> new ManagedLeaderLatch(dynamoDbClient, configuration,
+                                    ServiceDescriptor.builder().name("svc").hostname("host").port(8080).build()))
+                            .withMessage("serviceDescriptor version must not be blank"),
+                    () -> assertThatIllegalArgumentException()
+                            .isThrownBy(() -> new ManagedLeaderLatch(dynamoDbClient, configuration,
+                                    ServiceDescriptor.builder().name("svc").version("1.0").hostname(" ").port(8080).build()))
+                            .withMessage("serviceDescriptor hostname must not be blank"),
+                    () -> assertThatIllegalArgumentException()
+                            .isThrownBy(() -> new ManagedLeaderLatch(dynamoDbClient, configuration,
+                                    ServiceDescriptor.builder().name("svc").version("1.0").hostname("host").build()))
+                            .withMessage("serviceDescriptor port must be positive (was 0)"),
+                    () -> assertThat(new ManagedLeaderLatch(dynamoDbClient, configuration, valid).getId())
+                            .isEqualTo("svc/1.0/host:8080")
+            );
+        }
+
+        @Test
         void shouldRejectNullServiceDescriptor() {
             var dynamoDbClient = mock(DynamoDbClient.class);
             var configuration = LeaderLatchConfiguration.forTable("service-leader-locks");
@@ -127,6 +155,15 @@ class ManagedLeaderLatchTest {
                     .isExactlyInstanceOf(ManagedLeaderLatchException.class)
                     .hasMessage("Error starting leader latch test-service/1.0.0/host:8080")
                     .hasCause(cause);
+        }
+
+        @Test
+        void shouldThrowWhenTheLatchHasAlreadyBeenClosed() {
+            when(latch.start()).thenReturn(new StartResult.Closed());
+
+            assertThatThrownBy(managedLatch::start)
+                    .isExactlyInstanceOf(ManagedLeaderLatchException.class)
+                    .hasMessage("Cannot start leader latch test-service/1.0.0/host:8080 because it has been closed");
         }
 
         @Test

@@ -255,6 +255,30 @@ class ManagedLeaderLatchCreatorTest {
     }
 
     @Test
+    void shouldNotIncludeListenersAddedAfterStart() {
+        var noOpListener = new NoOpListener();
+        latchCreator = ManagedLeaderLatchCreator
+                .from(dynamoDbClient, configuration, environment, serviceDescriptor, noOpListener)
+                .start();
+
+        latchCreator.addLeaderLatchListener(new NoOpListener());
+
+        assertThat(latchCreator.getListeners()).containsExactly(noOpListener);
+    }
+
+    @Test
+    void shouldNotManageOrRegisterAnything_WhenTheLatchCannotBeStarted() {
+        var invalidDescriptor = ServiceDescriptor.builder().name("test-service").build();
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> ManagedLeaderLatchCreator
+                        .from(dynamoDbClient, configuration, environment, invalidDescriptor)
+                        .start());
+
+        verifyNoInteractions(lifecycle, jersey, healthCheckRegistry);
+    }
+
+    @Test
     void shouldReturnImmutableCopyOfListeners() {
         var noOpListener = new NoOpListener();
         latchCreator = ManagedLeaderLatchCreator

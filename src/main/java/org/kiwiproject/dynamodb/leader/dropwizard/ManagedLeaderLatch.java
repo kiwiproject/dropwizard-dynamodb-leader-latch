@@ -1,5 +1,7 @@
 package org.kiwiproject.dynamodb.leader.dropwizard;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.kiwiproject.base.KiwiPreconditions.checkArgumentNotBlank;
 import static org.kiwiproject.base.KiwiPreconditions.checkArgumentNotNull;
 import static org.kiwiproject.base.KiwiPreconditions.requireNotNull;
 
@@ -56,9 +58,11 @@ public class ManagedLeaderLatch implements Managed {
      *
      * @param dynamoDbClient    the AWS SDK client the latch should use; it is not closed by the latch
      * @param configuration     the latch configuration
-     * @param serviceDescriptor service metadata; the name is the leadership key
+     * @param serviceDescriptor service metadata; the name is the leadership key, and the name, version, hostname
+     *                          and port together make up the participant ID, so none may be blank and the port
+     *                          must be positive
      * @param listeners         zero or more listeners to add to the latch before it starts
-     * @throws IllegalArgumentException if any argument is null or blank
+     * @throws IllegalArgumentException if any argument is null or blank, or the port is not positive
      */
     public ManagedLeaderLatch(DynamoDbClient dynamoDbClient,
                               LeaderLatchConfiguration configuration,
@@ -93,6 +97,11 @@ public class ManagedLeaderLatch implements Managed {
                                         ServiceDescriptor serviceDescriptor,
                                         LeaderLatchListener... listeners) {
         checkArgumentNotNull(serviceDescriptor, "serviceDescriptor must not be null");
+        checkArgumentNotBlank(serviceDescriptor.getName(), "serviceDescriptor name must not be blank");
+        checkArgumentNotBlank(serviceDescriptor.getVersion(), "serviceDescriptor version must not be blank");
+        checkArgumentNotBlank(serviceDescriptor.getHostname(), "serviceDescriptor hostname must not be blank");
+        checkArgument(serviceDescriptor.getPort() > 0,
+                "serviceDescriptor port must be positive (was %s)", serviceDescriptor.getPort());
 
         var id = DynamoDbLeaderLatch.leaderLatchId(
                 serviceDescriptor.getName(),
@@ -127,7 +136,7 @@ public class ManagedLeaderLatch implements Managed {
      * Starts the latch. This returns without waiting to become the leader. Starting an already started latch
      * has no effect.
      *
-     * @throws ManagedLeaderLatchException if the latch cannot be started
+     * @throws ManagedLeaderLatchException if the latch cannot be started, including when it was already closed
      */
     @Override
     public void start() {
@@ -135,6 +144,11 @@ public class ManagedLeaderLatch implements Managed {
 
         if (result instanceof StartResult.Failed failed) {
             throw new ManagedLeaderLatchException("Error starting leader latch " + getId(), failed.cause());
+        }
+
+        if (result instanceof StartResult.Closed) {
+            throw new ManagedLeaderLatchException(
+                    "Cannot start leader latch " + getId() + " because it has been closed");
         }
 
         LOG.trace("Start result for leader latch {}: {}", getId(), result);

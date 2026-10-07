@@ -115,6 +115,24 @@ class ManagedLeaderLatchHealthCheckTest {
     }
 
     @Nested
+    class WhenLeadershipChangesDuringTheCheck {
+
+        @Test
+        void shouldNotReportAMismatch_WhenThisParticipantStoppedBeingLeaderDuringTheLookup() {
+            when(leaderLatch.checkLeadershipStatus())
+                    .thenReturn(new LeadershipStatus.IsLeader())
+                    .thenReturn(new LeadershipStatus.NotLeader());
+            when(leaderLatch.getLeader()).thenReturn(new LeaderInfo.Leader("2", Instant.now()));
+
+            assertThat(healthCheck)
+                    .isHealthy()
+                    .hasDetail("leader", false)
+                    .hasDetail("leaderParticipant", "2")
+                    .hasDetail("thisParticipant", "1");
+        }
+    }
+
+    @Nested
     class WhenHealthy {
 
         @Test

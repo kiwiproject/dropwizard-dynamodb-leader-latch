@@ -46,7 +46,8 @@ public class LeaderResource {
      * The response contains:
      * <ul>
      *     <li>{@code id}: the ID of this participant</li>
-     *     <li>{@code leader}: whether this participant is the leader</li>
+     *     <li>{@code leader}: whether this participant is the leader, taken from the same status snapshot as
+     *     {@code status} so the two always agree</li>
      *     <li>{@code leadershipKey}: the key shared by all participants contending for the same leadership</li>
      *     <li>{@code leaderId}: the participant ID that DynamoDB records as the leader, or null if there is
      *     no leader or the lookup failed</li>
@@ -59,15 +60,16 @@ public class LeaderResource {
     @GET
     @Path("/latch")
     public Response getLatchState() {
+        var status = leaderLatch.checkLeadershipStatus();
         var leaderId = leaderLatch.getLeader() instanceof LeaderInfo.Leader leader ? leader.participantId() : null;
 
         // Map.of does not allow null values, and leaderId can be null
         var entity = new LinkedHashMap<String, Object>();
         entity.put("id", leaderLatch.getId());
-        entity.put("leader", leaderLatch.hasLeadership());
+        entity.put("leader", status.isLeader());
         entity.put("leadershipKey", leaderLatch.getLeadershipKey());
         entity.put("leaderId", leaderId);
-        entity.put("status", leaderLatch.checkLeadershipStatus().getClass().getSimpleName());
+        entity.put("status", status.getClass().getSimpleName());
 
         return Response.ok(entity).build();
     }

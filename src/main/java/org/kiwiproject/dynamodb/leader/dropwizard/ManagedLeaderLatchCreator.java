@@ -42,6 +42,7 @@ public class ManagedLeaderLatchCreator {
 
     // Initialized via instance start() method so cannot be final
     private ManagedLeaderLatch leaderLatch;
+    private List<LeaderLatchListener> startedListeners;
     private boolean latchStarted;
     private boolean addHealthCheck;
     private ManagedLeaderLatchHealthCheck healthCheck;
@@ -210,10 +211,14 @@ public class ManagedLeaderLatchCreator {
 
         var listenerArray = listeners.toArray(new LeaderLatchListener[0]);
         var newLatch = new ManagedLeaderLatch(dynamoDbClient, configuration, serviceDescriptor, listenerArray);
-        environment.lifecycle().manage(newLatch);
+
+        // Start first, so a latch that cannot start is never registered with Dropwizard. Then register it
+        // before anything else that can fail, so Dropwizard stops it if the rest of startup fails.
         newLatch.start();
+        environment.lifecycle().manage(newLatch);
 
         leaderLatch = newLatch;
+        startedListeners = List.copyOf(listeners);
         latchStarted = true;
         addHealthCheckIfConfigured();
         addResourcesIfConfigured();
@@ -273,11 +278,11 @@ public class ManagedLeaderLatchCreator {
      *
      * @return any registered {@link LeaderLatchListener}s
      * @throws IllegalStateException if called but the latch has not been started yet
-     * @implNote The returned list is an unmodifiable list containing the registered listeners
+     * @implNote The returned list is an unmodifiable snapshot of the listeners the latch was started with
      */
     public List<LeaderLatchListener> getListeners() {
         validateStarted();
-        return List.copyOf(listeners);
+        return startedListeners;
     }
 
     private void validateStarted() {

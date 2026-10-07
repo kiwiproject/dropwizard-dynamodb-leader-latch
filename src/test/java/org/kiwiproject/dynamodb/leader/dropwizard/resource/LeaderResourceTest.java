@@ -68,7 +68,6 @@ class LeaderResourceTest {
     @Test
     void shouldReportLatchStateWhenThisParticipantIsLeader() {
         when(LEADER_LATCH.getId()).thenReturn("test-id-1");
-        when(LEADER_LATCH.hasLeadership()).thenReturn(true);
         when(LEADER_LATCH.getLeadershipKey()).thenReturn("test-service");
         when(LEADER_LATCH.getLeader()).thenReturn(new LeaderInfo.Leader("test-id-1", Instant.now()));
         when(LEADER_LATCH.checkLeadershipStatus()).thenReturn(new LeadershipStatus.IsLeader());
@@ -92,7 +91,6 @@ class LeaderResourceTest {
     @Test
     void shouldReportLatchStateWhenAnotherParticipantIsLeader() {
         when(LEADER_LATCH.getId()).thenReturn("test-id-1");
-        when(LEADER_LATCH.hasLeadership()).thenReturn(false);
         when(LEADER_LATCH.getLeadershipKey()).thenReturn("test-service");
         when(LEADER_LATCH.getLeader()).thenReturn(new LeaderInfo.Leader("test-id-2", Instant.now()));
         when(LEADER_LATCH.checkLeadershipStatus()).thenReturn(new LeadershipStatus.NotLeader());
@@ -114,7 +112,6 @@ class LeaderResourceTest {
     @Test
     void shouldReportNullLeaderIdWhenThereIsNoLeaderOrLookupFails() {
         when(LEADER_LATCH.getId()).thenReturn("test-id-1");
-        when(LEADER_LATCH.hasLeadership()).thenReturn(false);
         when(LEADER_LATCH.getLeadershipKey()).thenReturn("test-service");
         when(LEADER_LATCH.getLeader()).thenReturn(new LeaderInfo.LookupFailed(new IllegalStateException("boom")));
         when(LEADER_LATCH.checkLeadershipStatus()).thenReturn(new LeadershipStatus.NotStarted());
