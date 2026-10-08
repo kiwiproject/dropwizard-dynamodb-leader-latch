@@ -30,6 +30,7 @@
     <properties>
 
         <!-- Versions for required dependencies -->
+        <dynamodb-leader-latch.version>0.1.0</dynamodb-leader-latch.version>
         <kiwi.version>5.4.0</kiwi.version>
         <kiwi-bom.version>3.3.4</kiwi-bom.version>
         <metrics-healthchecks-severity.version>3.1.0</metrics-healthchecks-severity.version>
@@ -68,6 +69,12 @@
     <dependencies>
 
         <!-- required dependencies -->
+
+        <dependency>
+            <groupId>org.kiwiproject</groupId>
+            <artifactId>dynamodb-leader-latch</artifactId>
+            <version>${dynamodb-leader-latch.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>io.dropwizard</groupId>
