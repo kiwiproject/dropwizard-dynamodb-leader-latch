@@ -21,6 +21,13 @@ import jakarta.ws.rs.core.Response;
 public class GotLeaderLatchResource {
 
     /**
+     * Create the resource.
+     */
+    public GotLeaderLatchResource() {
+        // nothing to initialize
+    }
+
+    /**
      * Returns a 204 (No Content) response if available. Otherwise, a 404 is returned (though not
      * by this resource).
      *

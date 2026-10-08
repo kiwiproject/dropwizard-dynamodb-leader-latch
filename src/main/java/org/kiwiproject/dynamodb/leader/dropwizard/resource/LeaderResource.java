@@ -22,6 +22,12 @@ public class LeaderResource {
 
     private final ManagedLeaderLatch leaderLatch;
 
+    /**
+     * Create a resource for the given latch.
+     *
+     * @param leaderLatch the latch to report on
+     * @throws IllegalArgumentException if the latch is null
+     */
     public LeaderResource(ManagedLeaderLatch leaderLatch) {
         this.leaderLatch = requireNotNull(leaderLatch, "leaderLatch must not be null");
     }

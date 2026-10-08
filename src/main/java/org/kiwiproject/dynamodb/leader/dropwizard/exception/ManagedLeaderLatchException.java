@@ -8,17 +8,36 @@ package org.kiwiproject.dynamodb.leader.dropwizard.exception;
  */
 public class ManagedLeaderLatchException extends RuntimeException {
 
+    /**
+     * Create an exception with no message or cause.
+     */
     public ManagedLeaderLatchException() {
     }
 
+    /**
+     * Create an exception with the given message.
+     *
+     * @param message the message
+     */
     public ManagedLeaderLatchException(String message) {
         super(message);
     }
 
+    /**
+     * Create an exception with the given message and cause.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
     public ManagedLeaderLatchException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Create an exception with the given cause.
+     *
+     * @param cause the cause
+     */
     public ManagedLeaderLatchException(Throwable cause) {
         super(cause);
     }

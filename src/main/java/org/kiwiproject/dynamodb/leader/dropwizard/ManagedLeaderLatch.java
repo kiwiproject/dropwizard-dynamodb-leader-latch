@@ -7,7 +7,6 @@ import static org.kiwiproject.base.KiwiPreconditions.requireNotNull;
 
 import com.google.common.base.MoreObjects;
 import io.dropwizard.lifecycle.Managed;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.kiwiproject.dynamodb.leader.DynamoDbLeaderLatch;
 import org.kiwiproject.dynamodb.leader.LeaderInfo;
@@ -37,10 +36,6 @@ import java.util.function.Supplier;
 @Slf4j
 public class ManagedLeaderLatch implements Managed {
 
-    /**
-     * The wrapped latch. This is an "escape hatch" for anything not exposed by this class.
-     */
-    @Getter
     private final LeaderLatch latch;
 
     /**
@@ -121,6 +116,15 @@ public class ManagedLeaderLatch implements Managed {
 
         var latch = new DynamoDbLeaderLatch(dynamoDbClient, configuration, serviceName, id);
         Arrays.stream(listeners).forEach(latch::addListener);
+        return latch;
+    }
+
+    /**
+     * The wrapped latch. This is an "escape hatch" for anything not exposed by this class.
+     *
+     * @return the wrapped latch
+     */
+    public LeaderLatch getLatch() {
         return latch;
     }
 
