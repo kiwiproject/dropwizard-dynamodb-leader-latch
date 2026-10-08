@@ -282,7 +282,8 @@ public class ManagedLeaderLatchCreator {
      */
     public List<LeaderLatchListener> getListeners() {
         validateStarted();
-        return startedListeners;
+        // already immutable, so this returns the same instance; the call makes the immutability explicit
+        return List.copyOf(startedListeners);
     }
 
     private void validateStarted() {
