@@ -14,7 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * JAX-RS resource providing endpoints for checking leadership and latch information.
+ * Jakarta REST (formerly JAX-RS) resource providing endpoints for checking leadership and latch information.
  */
 @Path("/kiwi/leader-latch")
 @Produces(MediaType.APPLICATION_JSON)

@@ -94,7 +94,7 @@ public class ManagedLeaderLatchCreator {
 
     /**
      * If the only thing you want is a {@link ManagedLeaderLatch} and you want the standard options (a health
-     * check and JAX-RS REST resources) and you do not need references to them, use this method to create and
+     * check and Jakarta REST resources) and you do not need references to them, use this method to create and
      * start a latch.
      * <p>
      * Otherwise, use {@link #start(DynamoDbClient, LeaderLatchConfiguration, Environment, ServiceDescriptor, LeaderLatchListener...)}.
@@ -119,7 +119,7 @@ public class ManagedLeaderLatchCreator {
 
     /**
      * If you want a {@link ManagedLeaderLatch} and you want the standard options (a health
-     * check and JAX-RS REST resources) and you might need references to them, use this method to create and
+     * check and Jakarta REST resources) and you might need references to them, use this method to create and
      * start a latch.
      * <p>
      * The returned {@link ManagedLeaderLatchCreator} can be used to then obtain the {@link ManagedLeaderLatch}
@@ -191,7 +191,7 @@ public class ManagedLeaderLatchCreator {
      *     {@link #withoutHealthCheck()}
      * </li>
      * <li>
-     *     Creates and registers the JAX-RS REST endpoints unless explicitly disabled via {@link #withoutResources()}
+     *     Creates and registers the Jakarta REST endpoints unless explicitly disabled via {@link #withoutResources()}
      * </li>
      * </ul>
      * <p>

@@ -92,19 +92,19 @@ public class ManagedLeaderLatch implements Managed {
                                         ServiceDescriptor serviceDescriptor,
                                         LeaderLatchListener... listeners) {
         checkArgumentNotNull(serviceDescriptor, "serviceDescriptor must not be null");
-        checkArgumentNotBlank(serviceDescriptor.getName(), "serviceDescriptor name must not be blank");
-        checkArgumentNotBlank(serviceDescriptor.getVersion(), "serviceDescriptor version must not be blank");
-        checkArgumentNotBlank(serviceDescriptor.getHostname(), "serviceDescriptor hostname must not be blank");
-        checkArgument(serviceDescriptor.getPort() > 0,
-                "serviceDescriptor port must be positive (was %s)", serviceDescriptor.getPort());
+        checkArgumentNotBlank(serviceDescriptor.name(), "serviceDescriptor name must not be blank");
+        checkArgumentNotBlank(serviceDescriptor.version(), "serviceDescriptor version must not be blank");
+        checkArgumentNotBlank(serviceDescriptor.hostname(), "serviceDescriptor hostname must not be blank");
+        checkArgument(serviceDescriptor.port() > 0,
+                "serviceDescriptor port must be positive (was %s)", serviceDescriptor.port());
 
         var id = DynamoDbLeaderLatch.leaderLatchId(
-                serviceDescriptor.getName(),
-                serviceDescriptor.getVersion(),
-                serviceDescriptor.getHostname(),
-                serviceDescriptor.getPort());
+                serviceDescriptor.name(),
+                serviceDescriptor.version(),
+                serviceDescriptor.hostname(),
+                serviceDescriptor.port());
 
-        return newLatch(dynamoDbClient, configuration, serviceDescriptor.getName(), id, listeners);
+        return newLatch(dynamoDbClient, configuration, serviceDescriptor.name(), id, listeners);
     }
 
     private static LeaderLatch newLatch(DynamoDbClient dynamoDbClient,

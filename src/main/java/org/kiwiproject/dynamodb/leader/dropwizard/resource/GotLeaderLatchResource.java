@@ -7,7 +7,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
- * JAX-RS resource providing a single endpoint that allows clients to determine whether this service
+ * Jakarta REST (formerly JAX-RS) resource providing a single endpoint that allows clients to determine whether this service
  * participates in a leader latch.
  * <p>
  * Simply make a {@code GET /kiwi/got-leader-latch?} request. The question mark is not required but
