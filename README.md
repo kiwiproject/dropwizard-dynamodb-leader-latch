@@ -32,6 +32,16 @@ Then, in your Dropwizard `Application.run` method:
 // You own the DynamoDbClient and must close it; the latch never closes it.
 // DynamoDbClient.create() uses the default region and credentials (the task role on ECS).
 var dynamoDb = DynamoDbClient.create();
+
+// Register closing the client BEFORE starting the latch. Dropwizard stops managed objects in reverse order, so the
+// latch stops (and releases the lock) first, and the client is closed after it.
+environment.lifecycle().manage(new Managed() {
+    @Override
+    public void stop() {
+        dynamoDb.close();
+    }
+});
+
 var configuration = LeaderLatchConfiguration.forTable("service-leader-locks");
 
 var serviceDescriptor = ServiceDescriptor.builder()
@@ -55,6 +65,11 @@ started at all, a `ManagedLeaderLatchException` is thrown so the service does no
 such as DynamoDB being unreachable, is reported as a value instead of an exception (see
 [dynamodb-leader-latch](https://github.com/kiwiproject/dynamodb-leader-latch) for the table schema, IAM permissions,
 and configuration). Add listeners before starting, either as arguments or with `addLeaderLatchListener`.
+
+You must close the `DynamoDbClient` yourself, as the example does with a `Managed` registered before the latch is
+started: the latch never closes it, and an unclosed client keeps its connections and threads alive. See "Configuring the
+`DynamoDbClient`" in [dynamodb-leader-latch](https://github.com/kiwiproject/dynamodb-leader-latch) for custom CA
+certificates and timeouts.
 
 Use `ManagedLeaderLatchCreator.from(...)` to configure the creator first (`withoutHealthCheck()`,
 `withoutResources()`, `addLeaderLatchListener(...)`) and then call `start()`.
