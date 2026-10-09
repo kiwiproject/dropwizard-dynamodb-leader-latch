@@ -22,7 +22,7 @@ Add the dependency (this brings in `dynamodb-leader-latch` and its AWS SDK depen
 <dependency>
     <groupId>org.kiwiproject</groupId>
     <artifactId>dropwizard-dynamodb-leader-latch</artifactId>
-    <version>0.1.0</version>
+    <version>[current-version]</version>
 </dependency>
 ```
 
