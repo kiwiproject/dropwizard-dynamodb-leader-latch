@@ -45,7 +45,7 @@ class ManagedLeaderLatchTest {
         @Test
         void shouldRejectNullLatch() {
             assertThatIllegalArgumentException()
-                    .isThrownBy(() -> new ManagedLeaderLatch((LeaderLatch) null))
+                    .isThrownBy(() -> new ManagedLeaderLatch(null))
                     .withMessage("latch must not be null");
         }
 
@@ -122,7 +122,7 @@ class ManagedLeaderLatchTest {
             var configuration = LeaderLatchConfiguration.forTable("service-leader-locks");
 
             assertThatIllegalArgumentException()
-                    .isThrownBy(() -> new ManagedLeaderLatch(dynamoDbClient, configuration, (ServiceDescriptor) null))
+                    .isThrownBy(() -> new ManagedLeaderLatch(dynamoDbClient, configuration, null))
                     .withMessage("serviceDescriptor must not be null");
         }
     }
